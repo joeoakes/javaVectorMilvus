@@ -15,25 +15,24 @@ public class MilvusCRUD {
     }
 
     public void createCollection(String collectionName) {
-        CollectionSchema schema = CollectionSchema.newBuilder()
-                .withName(collectionName)
-                .withDescription("Test collection")
+        FieldType idField = FieldType.newBuilder()
+                .withName("id")
+                .withDataType(DataType.Int64)
+                .withPrimaryKey(true)
                 .withAutoID(true)
-                .addField(FieldType.newBuilder()
-                        .withName("id")
-                        .withDataType(DataType.Int64)
-                        .withPrimaryKey(true)
-                        .withAutoID(true)
-                        .build())
-                .addField(FieldType.newBuilder()
-                        .withName("vector")
-                        .withDataType(DataType.FloatVector)
-                        .withDimension(128)
-                        .build())
+                .build();
+
+        FieldType vectorField = FieldType.newBuilder()
+                .withName("vector")
+                .withDataType(DataType.FloatVector)
+                .withDimension(128)
                 .build();
 
         CreateCollectionParam createCollectionParam = CreateCollectionParam.newBuilder()
-                .withCollectionSchema(schema)
+                .withCollectionName(collectionName)
+                .withDescription("Test collection")
+                .addFieldType(idField)
+                .addFieldType(vectorField)
                 .build();
 
         client.createCollection(createCollectionParam);
@@ -59,11 +58,11 @@ public class MilvusCRUD {
                 .withMetricType(MetricType.L2)
                 .withTopK(10)
                 .withVectors(queryVectors)
-                .withParamsInJson("{\"nprobe\": 10}")
+                .withParams("{\"nprobe\": 10}")
                 .build();
 
         SearchResults searchResults = client.search(searchParam);
-        for (SearchResultsWrapper wrapper : searchResults.getResultWrapperList()) {
+        for (SearchResultsWrapper wrapper : searchResults.getResults()) {
             System.out.println("Search results: " + wrapper.getQueryResultList());
         }
     }
