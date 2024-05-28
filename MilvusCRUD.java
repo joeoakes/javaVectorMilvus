@@ -3,9 +3,9 @@ import io.milvus.param.*;
 import io.milvus.param.collection.*;
 import io.milvus.param.dml.*;
 import io.milvus.grpc.*;
-import io.milvus.response.SearchResultsWrapper;
-
 import java.util.*;
+
+//https://milvus.io/blog/2021-11-19-run-milvus-2.0-on-windows.md#Install-from-the-binary-package
 
 public class MilvusCRUD {
 
@@ -67,15 +67,16 @@ public class MilvusCRUD {
                 .build();
 
         R<SearchResults> searchResults = client.search(searchParam);
+        /*if (searchResults != null && searchResults.getStatus() == R.Status.SUCCESS) {
+            SearchResultsWrapper wrapper = new SearchResultsWrapper(searchResults.getData().getResults());
 
-        if (searchResults != null && searchResults.getStatus().intValue() == 0) {
-            SearchResultsWrapper wrapper = new SearchResultsWrapper(searchResults.getData());
-            for (int i = 0; i < wrapper.getResultCount(); ++i) {
-                System.out.println("Search result: " + wrapper.getFieldData("id", i));
+            for (int i = 0; i < wrapper.getFieldData("id").size(); ++i) {
+                System.out.println("Search result id: " + wrapper.getFieldData("id").get(i));
             }
         } else {
             System.err.println("Search failed: " + searchResults.getMessage());
         }
+        */
     }
 
     public void deleteCollection(String collectionName) {
