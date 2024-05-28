@@ -3,6 +3,7 @@ import io.milvus.param.*;
 import io.milvus.param.collection.*;
 import io.milvus.param.dml.*;
 import io.milvus.grpc.*;
+import io.milvus.response.SearchResultsWrapper;
 
 import java.util.*;
 
@@ -53,17 +54,27 @@ public class MilvusCRUD {
     }
 
     public void searchData(String collectionName, List<List<Float>> queryVectors) {
+        List<String> fieldNames = Collections.singletonList("vector");
+
         SearchParam searchParam = SearchParam.newBuilder()
                 .withCollectionName(collectionName)
                 .withMetricType(MetricType.L2)
                 .withTopK(10)
                 .withVectors(queryVectors)
+                .withVectorFieldName("vector")
+                .withOutFields(fieldNames)
                 .withParams("{\"nprobe\": 10}")
                 .build();
 
-        SearchResults searchResults = client.search(searchParam);
-        for (SearchResultsWrapper wrapper : searchResults.getResults()) {
-            System.out.println("Search results: " + wrapper.getQueryResultList());
+        R<SearchResults> searchResults = client.search(searchParam);
+
+        if (searchResults != null && searchResults.getStatus().intValue() == 0) {
+            SearchResultsWrapper wrapper = new SearchResultsWrapper(searchResults.getData());
+            for (int i = 0; i < wrapper.getResultCount(); ++i) {
+                System.out.println("Search result: " + wrapper.getFieldData("id", i));
+            }
+        } else {
+            System.err.println("Search failed: " + searchResults.getMessage());
         }
     }
 
